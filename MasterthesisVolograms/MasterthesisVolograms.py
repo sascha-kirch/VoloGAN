@@ -12,7 +12,12 @@ import time
 import os
 
 NAME = "Sascha-first-model-{}".format(int(time.time()))
-tensorboard_callback = TensorBoard(log_dir='logs/{}'.format(NAME), histogram_freq = 1, profile_batch = '100,120')
+tensorboard_callback = TensorBoard(
+    log_dir='logs/{}'.format(NAME), 
+    update_freq = 'epoch',
+    histogram_freq = 1, 
+    profile_batch = '100, 200'
+    )
 
 
 #"C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python37_64\Lib\site-packages\tensorboard\main.py"
@@ -25,8 +30,8 @@ tensorboard_callback = TensorBoard(log_dir='logs/{}'.format(NAME), histogram_fre
 # Check on which device the task is running
 #tf.debugging.set_log_device_placement(True)
 
-# tf.test.is_built_with_cuda()
-# tf.test.is_gpu_available()#cuda_only=False, min_cuda_compute_capability=None)
+#tf.test.is_built_with_cuda()
+#tf.test.is_gpu_available()#cuda_only=False, min_cuda_compute_capability=None)
 
 # GPU is automatically used when applicable
 #a = tf.constant([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
@@ -109,13 +114,21 @@ dataset = windowed_dataset(x_train, window_size, batch_size, shuffle_buffer_size
 model = tf.keras.models.Sequential([
   tf.keras.layers.Dense(10, activation="relu", input_shape=[window_size]),
   tf.keras.layers.Dense(10, activation="relu"),
+  tf.keras.layers.Dense(6, activation="relu"),
+  tf.keras.layers.Dense(4, activation="relu"),
   tf.keras.layers.Dense(1)
 ])
 
 optimizer = tf.keras.optimizers.SGD(lr=8e-6, momentum=0.9)
-model.compile(loss="mse", optimizer=optimizer)
+
+
+model.compile(
+    loss="mse", 
+    optimizer=optimizer
+    )
+
 
 model.fit(dataset,
-          epochs=200,
+          epochs=500,
           verbose=2,
           callbacks = [tensorboard_callback])
