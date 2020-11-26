@@ -19,6 +19,41 @@ tensorboard_callback = TensorBoard(
     profile_batch = '100, 200'
     )
 
+
+#"C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python37_64\Lib\site-packages\tensorboard\main.py"
+#os.system('py "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\Python37_64\\Lib\\site-packages\\tensorboard\\main.py" --logdir=logs/ --host localhost')
+#log_dir = os.path.join('logs','fit', datetime.now().strftime('%Y%m%d-%H%M%S'))
+#print(log_dir)
+#os.makedirs(log_dir, exist_ok=True)
+
+
+# Check on which device the task is running
+#tf.debugging.set_log_device_placement(True)
+
+#tf.test.is_built_with_cuda()
+#tf.test.is_gpu_available()#cuda_only=False, min_cuda_compute_capability=None)
+
+# GPU is automatically used when applicable
+#a = tf.constant([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
+#b = tf.constant([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
+#c = tf.matmul(a, b)
+#print(c)
+
+
+# Place tensors on the CPU manually. This also tries to use all available Cores!
+#with tf.device('/CPU:0'):
+#  a = tf.constant([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
+#  b = tf.constant([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
+#  c = tf.matmul(a, b)
+#print(c)
+
+# Commented out IPython magic to ensure Python compatibility.
+#try:
+  # %tensorflow_version only exists in Colab.
+#   %tensorflow_version 2.x
+#except Exception:
+#  pass
+
 print("TensorFlow version: ", tf.__version__)
 
 device_name = tf.test.gpu_device_name()
