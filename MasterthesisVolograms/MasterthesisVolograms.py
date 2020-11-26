@@ -7,12 +7,19 @@ import multiprocessing
 import tensorflow_datasets as tfds
 import shutil
 from datetime import datetime
-
+from tensorflow.keras.callbacks import TensorBoard
+import time
 import os
+
+NAME = "Sascha-first-model-{}".format(int(time.time()))
+tensorboard_callback = TensorBoard(log_dir='logs/{}'.format(NAME), histogram_freq = 1, profile_batch = '100,120')
 
 
 #"C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python37_64\Lib\site-packages\tensorboard\main.py"
-os.system("C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python37_64\Lib\site-packages\tensorboard\main.py")
+#os.system('py "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\Python37_64\\Lib\\site-packages\\tensorboard\\main.py" --logdir=logs/ --host localhost')
+#log_dir = os.path.join('logs','fit', datetime.now().strftime('%Y%m%d-%H%M%S'))
+#print(log_dir)
+#os.makedirs(log_dir, exist_ok=True)
 
 
 # Check on which device the task is running
@@ -42,13 +49,12 @@ os.system("C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python37_64\Lib
 #except Exception:
 #  pass
 
-print(tf.__version__)
+print("TensorFlow version: ", tf.__version__)
 
-def plot_series(time, series, format="-", start=0, end=None):
-    plt.plot(time[start:end], series[start:end], format)
-    plt.xlabel("Time")
-    plt.ylabel("Value")
-    plt.grid(True)
+device_name = tf.test.gpu_device_name()
+if not device_name:
+  raise SystemError('GPU device not found')
+print('Found GPU at: {}'.format(device_name))
 
 def trend(time, slope=0):
     return slope * time
@@ -71,7 +77,6 @@ def noise(time, noise_level=1, seed=None):
 time = np.arange(4 * 365 + 1, dtype="float32")
 baseline = 10
 series = trend(time, 0.1)  
-baseline = 10
 amplitude = 20
 slope = 0.09
 noise_level = 5
@@ -87,12 +92,8 @@ x_train = series[:split_time]
 time_valid = time[split_time:]
 x_valid = series[split_time:]
 
-window_size = 20
 batch_size = 32
 shuffle_buffer_size = 1000
-
-plt.figure(figsize=(10, 6))
-plot_series(time_valid, x_valid)
 
 def windowed_dataset(series, window_size, batch_size, shuffle_buffer):
   dataset = tf.data.Dataset.from_tensor_slices(series)
@@ -101,52 +102,6 @@ def windowed_dataset(series, window_size, batch_size, shuffle_buffer):
   dataset = dataset.shuffle(shuffle_buffer).map(lambda window: (window[:-1], window[-1]))
   dataset = dataset.batch(batch_size).prefetch(1)
   return dataset
-
-dataset = windowed_dataset(x_train, window_size, batch_size, shuffle_buffer_size)
-
-
-model = tf.keras.models.Sequential([
-    tf.keras.layers.Dense(10, input_shape=[window_size], activation="relu"), 
-    tf.keras.layers.Dense(10, activation="relu"), 
-    tf.keras.layers.Dense(1)
-])
-
-model.compile(loss="mse", optimizer=tf.keras.optimizers.SGD(lr=1e-6, momentum=0.9))
-model.fit(dataset,epochs=100,verbose=0)
-
-forecast = []
-for time in range(len(series) - window_size):
-  forecast.append(model.predict(series[time:time + window_size][np.newaxis]))
-
-forecast = forecast[split_time-window_size:]
-results = np.array(forecast)[:, 0, 0]
-
-
-plt.figure(figsize=(10, 6))
-
-plot_series(time_valid, x_valid)
-plot_series(time_valid, results)
-
-tf.keras.metrics.mean_absolute_error(x_valid, results).numpy()
-
-dataset = windowed_dataset(x_train, window_size, batch_size, shuffle_buffer_size)
-
-
-model = tf.keras.models.Sequential([
-    tf.keras.layers.Dense(10, input_shape=[window_size], activation="relu"), 
-    tf.keras.layers.Dense(10, activation="relu"), 
-    tf.keras.layers.Dense(1)
-])
-
-lr_schedule = tf.keras.callbacks.LearningRateScheduler(
-    lambda epoch: 1e-8 * 10**(epoch / 20))
-optimizer = tf.keras.optimizers.SGD(lr=1e-8, momentum=0.9)
-model.compile(loss="mse", optimizer=optimizer)
-history = model.fit(dataset, epochs=100, callbacks=[lr_schedule], verbose=0)
-
-lrs = 1e-8 * (10 ** (np.arange(100) / 20))
-plt.semilogx(lrs, history.history["loss"])
-plt.axis([1e-8, 1e-3, 0, 300])
 
 window_size = 30
 dataset = windowed_dataset(x_train, window_size, batch_size, shuffle_buffer_size)
@@ -159,34 +114,8 @@ model = tf.keras.models.Sequential([
 
 optimizer = tf.keras.optimizers.SGD(lr=8e-6, momentum=0.9)
 model.compile(loss="mse", optimizer=optimizer)
-history = model.fit(dataset, epochs=500, verbose=2)
 
-loss = history.history['loss']
-epochs = range(len(loss))
-plt.plot(epochs, loss, 'b', label='Training Loss')
-plt.show()
-
-# Plot all but the first 10
-loss = history.history['loss']
-epochs = range(10, len(loss))
-plot_loss = loss[10:]
-print(plot_loss)
-plt.plot(epochs, plot_loss, 'b', label='Training Loss')
-plt.show()
-
-forecast = []
-for time in range(len(series) - window_size):
-  forecast.append(model.predict(series[time:time + window_size][np.newaxis]))
-
-forecast = forecast[split_time-window_size:]
-results = np.array(forecast)[:, 0, 0]
-
-
-plt.figure(figsize=(10, 6))
-
-plot_series(time_valid, x_valid)
-plot_series(time_valid, results)
-
-tf.keras.metrics.mean_absolute_error(x_valid, results).numpy()
-
-print("Reached End")
+model.fit(dataset,
+          epochs=200,
+          verbose=2,
+          callbacks = [tensorboard_callback])
