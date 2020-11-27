@@ -14,13 +14,6 @@ import io
 
 #Define Name for Model and define callback! 
 NAME = "Pix2Pix-{}".format(int(time.time()))
-#tensorboard_callback = TensorBoard(
-#    log_dir='logs/{}'.format(NAME), 
-#    update_freq = 'epoch',
-#    histogram_freq = 1, 
-#    profile_batch = '100, 200'
-#    )
-
 
 #print Tensoflow version
 print("TensorFlow version: ", tf.__version__)
@@ -192,17 +185,6 @@ def upsample(filters, size, apply_dropout=False):
   result.add(tf.keras.layers.ReLU())
 
   return result
-
-
-#test downsample
-#down_model = downsample(3, 4)
-#down_result = down_model(tf.expand_dims(inp, 0))
-#print (down_result.shape)
-
-#test upsample
-#up_model = upsample(3, 4)
-#up_result = up_model(down_result)
-#print (up_result.shape)
 
 def Generator():
   inputs = tf.keras.layers.Input(shape=[256,256,3])
