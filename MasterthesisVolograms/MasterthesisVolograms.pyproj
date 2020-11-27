@@ -23,6 +23,7 @@
   <ItemGroup>
     <Compile Include="Example_Tensorboard_timesignal.py" />
     <Compile Include="MasterthesisVolograms.py" />
+    <Compile Include="Pix2Pix.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
