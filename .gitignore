@@ -339,3 +339,4 @@ ASALocalRun/
 # BeatPulse healthcheck temp database
 healthchecksdb
 /MasterthesisVolograms/logs
+/MasterthesisVolograms/Datasets/cityscapes

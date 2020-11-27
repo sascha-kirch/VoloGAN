@@ -54,12 +54,15 @@ tensorboard_callback = TensorBoard(
 #except Exception:
 #  pass
 
+#print Tensoflow version
 print("TensorFlow version: ", tf.__version__)
 
+#print gpu device if available!
 device_name = tf.test.gpu_device_name()
 if not device_name:
   raise SystemError('GPU device not found')
 print('Found GPU at: {}'.format(device_name))
+
 
 def trend(time, slope=0):
     return slope * time
@@ -78,6 +81,14 @@ def seasonality(time, period, amplitude=1, phase=0):
 def noise(time, noise_level=1, seed=None):
     rnd = np.random.RandomState(seed)
     return rnd.randn(len(time)) * noise_level
+
+def windowed_dataset(series, window_size, batch_size, shuffle_buffer):
+  dataset = tf.data.Dataset.from_tensor_slices(series)
+  dataset = dataset.window(window_size + 1, shift=1, drop_remainder=True)
+  dataset = dataset.flat_map(lambda window: window.batch(window_size + 1))
+  dataset = dataset.shuffle(shuffle_buffer).map(lambda window: (window[:-1], window[-1]))
+  dataset = dataset.batch(batch_size).prefetch(1)
+  return dataset
 
 time = np.arange(4 * 365 + 1, dtype="float32")
 baseline = 10
@@ -100,14 +111,6 @@ x_valid = series[split_time:]
 batch_size = 32
 shuffle_buffer_size = 1000
 
-def windowed_dataset(series, window_size, batch_size, shuffle_buffer):
-  dataset = tf.data.Dataset.from_tensor_slices(series)
-  dataset = dataset.window(window_size + 1, shift=1, drop_remainder=True)
-  dataset = dataset.flat_map(lambda window: window.batch(window_size + 1))
-  dataset = dataset.shuffle(shuffle_buffer).map(lambda window: (window[:-1], window[-1]))
-  dataset = dataset.batch(batch_size).prefetch(1)
-  return dataset
-
 window_size = 30
 dataset = windowed_dataset(x_train, window_size, batch_size, shuffle_buffer_size)
 
@@ -120,7 +123,6 @@ model = tf.keras.models.Sequential([
 ])
 
 optimizer = tf.keras.optimizers.SGD(lr=8e-6, momentum=0.9)
-
 
 model.compile(
     loss="mse", 

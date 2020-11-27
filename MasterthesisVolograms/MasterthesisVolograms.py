@@ -11,6 +11,7 @@ from tensorflow.keras.callbacks import TensorBoard
 import time
 import os
 
+#Define Name for Model and define callback! 
 NAME = "Sascha-first-model-{}".format(int(time.time()))
 tensorboard_callback = TensorBoard(
     log_dir='logs/{}'.format(NAME), 
@@ -19,81 +20,137 @@ tensorboard_callback = TensorBoard(
     profile_batch = '100, 200'
     )
 
+#print Tensoflow version
 print("TensorFlow version: ", tf.__version__)
 
-device_name = tf.test.gpu_device_name()
-if not device_name:
-  raise SystemError('GPU device not found')
-print('Found GPU at: {}'.format(device_name))
-
-def trend(time, slope=0):
-    return slope * time
-
-def seasonal_pattern(season_time):
-    """Just an arbitrary pattern, you can change it if you wish"""
-    return np.where(season_time < 0.4,
-                    np.cos(season_time * 2 * np.pi),
-                    1 / np.exp(3 * season_time))
-
-def seasonality(time, period, amplitude=1, phase=0):
-    """Repeats the same pattern at each period"""
-    season_time = ((time + phase) % period) / period
-    return amplitude * seasonal_pattern(season_time)
-
-def noise(time, noise_level=1, seed=None):
-    rnd = np.random.RandomState(seed)
-    return rnd.randn(len(time)) * noise_level
-
-time = np.arange(4 * 365 + 1, dtype="float32")
-baseline = 10
-series = trend(time, 0.1)  
-amplitude = 20
-slope = 0.09
-noise_level = 5
-
-# Create the series
-series = baseline + trend(time, slope) + seasonality(time, period=365, amplitude=amplitude)
-# Update with noise
-series += noise(time, noise_level, seed=42)
-
-split_time = 1000
-time_train = time[:split_time]
-x_train = series[:split_time]
-time_valid = time[split_time:]
-x_valid = series[split_time:]
-
-batch_size = 32
-shuffle_buffer_size = 1000
-
-def windowed_dataset(series, window_size, batch_size, shuffle_buffer):
-  dataset = tf.data.Dataset.from_tensor_slices(series)
-  dataset = dataset.window(window_size + 1, shift=1, drop_remainder=True)
-  dataset = dataset.flat_map(lambda window: window.batch(window_size + 1))
-  dataset = dataset.shuffle(shuffle_buffer).map(lambda window: (window[:-1], window[-1]))
-  dataset = dataset.batch(batch_size).prefetch(1)
-  return dataset
-
-window_size = 30
-dataset = windowed_dataset(x_train, window_size, batch_size, shuffle_buffer_size)
-
-model = tf.keras.models.Sequential([
-  tf.keras.layers.Dense(10, activation="relu", input_shape=[window_size]),
-  tf.keras.layers.Dense(10, activation="relu"),
-  tf.keras.layers.Dense(6, activation="relu"),
-  tf.keras.layers.Dense(4, activation="relu"),
-  tf.keras.layers.Dense(1)
-])
-
-optimizer = tf.keras.optimizers.SGD(lr=8e-6, momentum=0.9)
+# Check for GPU and set Memory groth to true!
+physical_devices = tf.config.experimental.list_physical_devices('GPU')
+assert len(physical_devices) > 0, "Not enough GPU hardware devices available"
+tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 
-model.compile(
-    loss="mse", 
-    optimizer=optimizer
-    )
+PATH = os.path.join('Datasets','cityscapes')
+BUFFER_SIZE = 400
+BATCH_SIZE = 1
+IMG_WIDTH = 256
+IMG_HEIGHT = 256
 
+def load(image_file):
+  image = tf.io.read_file(image_file)
+  image = tf.image.decode_jpeg(image)
 
-model.fit(dataset,
-          epochs=500,
-          verbose=2,
-          callbacks = [tensorboard_callback])
+  w = tf.shape(image)[1]
+
+  w = w // 2
+  real_image = image[:, :w, :]
+  input_image = image[:, w:, :]
+
+  input_image = tf.cast(input_image, tf.float32)
+  real_image = tf.cast(real_image, tf.float32)
+
+  return input_image, real_image
+
+def resize(input_image, real_image, height, width):
+  input_image = tf.image.resize(input_image, [height, width],
+                                method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
+  real_image = tf.image.resize(real_image, [height, width],
+                               method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
+
+  return input_image, real_image
+
+def random_crop(input_image, real_image):
+  stacked_image = tf.stack([input_image, real_image], axis=0)
+  cropped_image = tf.image.random_crop(
+      stacked_image, size=[2, IMG_HEIGHT, IMG_WIDTH, 3])
+
+  return cropped_image[0], cropped_image[1]
+
+# normalizing the images to [-1, 1]
+def normalize(input_image, real_image):
+  input_image = (input_image / 127.5) - 1
+  real_image = (real_image / 127.5) - 1
+
+  return input_image, real_image
+
+@tf.function()
+def random_jitter(input_image, real_image):
+  # resizing to 286 x 286 x 3
+  input_image, real_image = resize(input_image, real_image, 286, 286)
+
+  # randomly cropping to 256 x 256 x 3
+  input_image, real_image = random_crop(input_image, real_image)
+
+  if tf.random.uniform(()) > 0.5:
+    # random mirroring
+    input_image = tf.image.flip_left_right(input_image)
+    real_image = tf.image.flip_left_right(real_image)
+
+  return input_image, real_image
+
+def load_image_train(image_file):
+  input_image, real_image = load(image_file)
+  input_image, real_image = random_jitter(input_image, real_image)
+  input_image, real_image = normalize(input_image, real_image)
+
+  return input_image, real_image
+
+def load_image_test(image_file):
+  input_image, real_image = load(image_file)
+  input_image, real_image = resize(input_image, real_image,
+                                   IMG_HEIGHT, IMG_WIDTH)
+  input_image, real_image = normalize(input_image, real_image)
+
+  return input_image, real_image
+
+##################################################
+###### Show One Datassample to test
+##################################################
+#inp, re = load(PATH+'\\train\\100.jpg')
+inp, re = load(os.path.join(PATH,'train','100.jpg'))
+# casting to int for matplotlib to show the image
+plt.figure()
+plt.imshow(inp/255.0)
+plt.figure()
+plt.imshow(re/255.0)
+plt.show(block = False)
+
+##################################################
+###### Data augmentation test
+##################################################
+plt.figure(figsize=(6, 6))
+for i in range(4):
+  rj_inp, rj_re = random_jitter(inp, re)
+  plt.subplot(2, 2, i+1)
+  plt.imshow(rj_inp/255.0)
+  plt.axis('off')
+plt.show(block = False)
+
+##################################################
+###### Create Datasets! Input Pipeleine
+##################################################
+#train_dataset = tf.data.Dataset.list_files(PATH+'train/*.jpg')
+train_dataset = tf.data.Dataset.list_files(os.path.join(PATH,'train','*.jpg'))
+train_dataset = train_dataset.map(load_image_train, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+train_dataset = train_dataset.shuffle(BUFFER_SIZE)
+train_dataset = train_dataset.batch(BATCH_SIZE)
+
+test_dataset = tf.data.Dataset.list_files(os.path.join(PATH,'train','*.jpg'))
+test_dataset = test_dataset.map(load_image_test)
+test_dataset = test_dataset.batch(BATCH_SIZE)
+
+##################################################
+###### Build the Generator
+##################################################
+OUTPUT_CHANNELS = 3
+def downsample(filters, size, apply_batchnorm=True):
+  initializer = tf.random_normal_initializer(0., 0.02)
+  result = tf.keras.Sequential()
+  result.add(tf.keras.layers.Conv2D(filters, size, strides=2, padding='same',kernel_initializer=initializer, use_bias=False))
+  if apply_batchnorm:
+    result.add(tf.keras.layers.BatchNormalization())
+  result.add(tf.keras.layers.LeakyReLU())
+  return result
+
+down_model = downsample(3, 4)
+down_result = down_model(tf.expand_dims(inp, 0))
+print (down_result.shape)
