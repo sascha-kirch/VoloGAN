@@ -21,6 +21,7 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Example_CycleGAN_UNET.py" />
     <Compile Include="Example_Tensorboard_timesignal.py" />
     <Compile Include="MasterthesisVolograms.py" />
     <Compile Include="Pix2Pix.py" />
