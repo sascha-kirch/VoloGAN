@@ -100,16 +100,19 @@ def preprocess_test_image(img, label):
 ####################################################################################################
 # Apply the preprocessing operations to the training data
 train_horses = (
-    train_horses.map(preprocess_train_image, num_parallel_calls=autotune)
-    .cache()
-    .shuffle(buffer_size)
-    .batch(batch_size)
+    train_horses.map(preprocess_train_image, num_parallel_calls=autotune) #distribute preprocessing to different cores!
+    .cache()                                                              # cach the dataset
+    .shuffle(buffer_size)                                                 # shuffle the data set
+    .batch(batch_size)                                                    # batch them together
+    .prefetch(autotune)                                                   # prefetch the next images while others are processed!
 )
+
 train_zebras = (
     train_zebras.map(preprocess_train_image, num_parallel_calls=autotune)
     .cache()
     .shuffle(buffer_size)
     .batch(batch_size)
+    .prefetch(autotune) 
 )
 
 # Apply the preprocessing operations to the test data
@@ -118,12 +121,14 @@ test_horses = (
     .cache()
     .shuffle(buffer_size)
     .batch(batch_size)
+    .prefetch(autotune) 
 )
 test_zebras = (
     test_zebras.map(preprocess_test_image, num_parallel_calls=autotune)
     .cache()
     .shuffle(buffer_size)
     .batch(batch_size)
+    .prefetch(autotune) 
 )
 
 ####################################################################################################

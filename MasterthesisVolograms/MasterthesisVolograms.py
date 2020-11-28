@@ -100,16 +100,18 @@ def preprocess_test_image(img, label):
 ####################################################################################################
 # Apply the preprocessing operations to the training data
 train_horses = (
-    train_horses.map(preprocess_train_image, num_parallel_calls=autotune)
-    .cache()
-    .shuffle(buffer_size)
-    .batch(batch_size)
+    train_horses.map(preprocess_train_image, num_parallel_calls=autotune) #distribute preprocessing to different cores!
+    .cache()                                                              # cach the dataset
+    .shuffle(buffer_size)                                                 # shuffle the data set
+    .batch(batch_size)                                                    # batch them together
+    .prefetch(autotune)                                                   # prefetch the next images while others are processed!
 )
 train_zebras = (
     train_zebras.map(preprocess_train_image, num_parallel_calls=autotune)
     .cache()
     .shuffle(buffer_size)
     .batch(batch_size)
+    .prefetch(autotune)
 )
 
 # Apply the preprocessing operations to the test data
@@ -118,12 +120,14 @@ test_horses = (
     .cache()
     .shuffle(buffer_size)
     .batch(batch_size)
+    .prefetch(autotune)
 )
 test_zebras = (
     test_zebras.map(preprocess_test_image, num_parallel_calls=autotune)
     .cache()
     .shuffle(buffer_size)
     .batch(batch_size)
+    .prefetch(autotune)
 )
 
 ####################################################################################################
@@ -265,9 +269,9 @@ def upsample(
 ####################################################################################################
 def get_generator(
     filters=64,
-    num_downsampling_blocks=4, #changed from 2 to 4 to speed up training
-    num_residual_blocks=2,      #changed from 9 to 2 to speed up training
-    num_upsample_blocks=4,      #changed from 2 to 4 to speed up training
+    num_downsampling_blocks=1, #changed from 2 to 4 to speed up training
+    num_residual_blocks=1,      #changed from 9 to 2 to speed up training
+    num_upsample_blocks=1,      #changed from 2 to 4 to speed up training
     gamma_initializer=gamma_init,
     name=None,
 ):
@@ -572,7 +576,7 @@ cycle_gan_model.compile(
 # Callbacks
 plotter = GANMonitor()
 
-checkpoint_path = os.path.join("training_checkpoints_"+ NAME,"cp-{epoch:04d}")
+checkpoint_path = os.path.join("training_checkpoints","cp-{epoch:04d}")
 checkpoint_dir = os.path.dirname(checkpoint_path)
 
 # Create a callback that saves the model's weights every 5 epochs
