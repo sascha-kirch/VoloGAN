@@ -21,10 +21,14 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Example_CycleGAN_UNET.py" />
-    <Compile Include="Example_Tensorboard_timesignal.py" />
+    <Compile Include="Examples\Example_CycleGAN_UNET.py" />
+    <Compile Include="Examples\Example_Tensorboard_timesignal.py" />
     <Compile Include="MasterthesisVolograms.py" />
-    <Compile Include="Example_Pix2Pix.py" />
+    <Compile Include="Examples\Example_Pix2Pix.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Examples\" />
+    <Folder Include="Models\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
