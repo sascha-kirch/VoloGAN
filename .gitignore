@@ -341,3 +341,5 @@ healthchecksdb
 /MasterthesisVolograms/logs
 /MasterthesisVolograms/Datasets/cityscapes
 /MasterthesisVolograms/training_checkpoints
+/MasterthesisVolograms/DatasetVolograms
+/MasterthesisVolograms/Datasets/dataset
