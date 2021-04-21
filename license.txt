@@ -1,0 +1,6 @@
+Copyright (C) 2020 Volograms Limited
+
+This file is part of VoloGAN.
+  
+VoloGAN can not be copied and/or distributed without the express
+permission of Volograms Limited
