@@ -39,6 +39,19 @@ Our generator follows an encoder-decoder architecture with multiple connections 
 
 ## Results:
 
+### Generated RGBD
+Generated RGB      |  Generated Depth
+:-------------------------|:-------------------------
+<img src="https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/multiple_rgb.png" width="500" /> |  <img src="https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/multiple_depth.png" width="500" />
+
+
+
+### 3D Point Clouds
+Input RGBD (Rendered 3D Model)      |  Generated RGBD (Consumer Depth Sensor)
+:-------------------------|:-------------------------
+<img src="https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/3d_pointcloud_input.png" width="500" />  |  <img src="https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/3d_pointcloud_generated.png" width="500" />
+Input RGBD that has been rendered from an existing 3D model | Generated point cloud that incorporates the typical characteristics of a consumer depth sensor e.g. tail of points at edges.
+
 ### PCA - Principal Component Analysis
 Principal component analysis of the five principal components from 50 samples of each domain. Orange: generated
 images of the target domain. Blue: real images of the target domain.
@@ -46,16 +59,3 @@ images of the target domain. Blue: real images of the target domain.
 Before Training             |  After Training
 :-------------------------:|:-------------------------:
 <img src="https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/pca_before.PNG" width="200" />  |  <img src="https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/pca_after.PNG" width="200" />
-
-
-### 3D Point Clouds
-Input RGBD             |  Generated RGBD
-:-------------------------:|:-------------------------:
-<img src="https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/3d_pointcloud_input.png" width="500" />  |  <img src="https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/3d_pointcloud_generated.png" width="500" />
-
-
-### Generated RGBD
-<img src="https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/multiple_rgb.png" width="500" />
-<img src="https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/multiple_depth.png" width="500" />
-
-
