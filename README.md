@@ -26,36 +26,35 @@ structural similarity loss of cycled image pairs and an identity loss.
 <details><summary>Show Models</summary>
 <p>
 
-Generator             |  Discriminator
-:-------------------------|:-------------------------
-![](https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/generator_model.png)  | ![](https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/critic_model.png)
-Our generator follows an encoder-decoder architecture with multiple connections between encoder and decoder. | The discriminator has three outputs to evaluate weather an input RGB-D image is real or fake: low level evaluation, layout evaluation and content evaluation. We explicitly encourage the disentanglement between layout and content by a two-branch architecture.
+|Generator | Discriminator |
+|:---------|:--------------|
+|![](https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/generator_model.png)  | ![](https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/critic_model.png)|
+|Our generator follows an encoder-decoder architecture with multiple connections between encoder and decoder. | The discriminator has three outputs to evaluate weather an input RGB-D image is real or fake: low level evaluation, layout evaluation and content evaluation. We explicitly encourage the disentanglement between layout and content by a two-branch architecture.|
 
 </p>
 </details>
 
 
-
-
 ## Results:
 
 ### Generated RGBD
-Generated RGB      |  Generated Depth
-:-------------------------|:-------------------------
-<img src="https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/multiple_rgb.png" width="500" /> |  <img src="https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/multiple_depth.png" width="500" />
 
+|Generated RGB | Generated Depth |
+|:-------------| ----------------|
+|![](https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/multiple_rgb.png) |  ![](https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/multiple_depth.png)|
 
 
 ### 3D Point Clouds
-Input RGBD (Rendered 3D Model)      |  Generated RGBD (Consumer Depth Sensor)
-:-------------------------|:-------------------------
-<img src="https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/3d_pointcloud_input.png" width="500" />  |  <img src="https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/3d_pointcloud_generated.png" width="500" />
-Input RGBD that has been rendered from an existing 3D model | Generated point cloud that incorporates the typical characteristics of a consumer depth sensor e.g. tail of points at edges.
+
+|Input RGBD (Rendered 3D Model) | Generated RGBD (Consumer Depth Sensor) |
+|:------------------------------|:---------------------------------------|
+|<img src="https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/3d_pointcloud_input.png" width="500" />  |  <img src="https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/3d_pointcloud_generated.png" width="500" /> |
+|Input RGBD that has been rendered from an existing 3D model | Generated point cloud that incorporates the typical characteristics of a consumer depth sensor e.g. tail of points at edges.|
 
 ### PCA - Principal Component Analysis
 Principal component analysis of the five principal components from 50 samples of each domain. Orange: generated
 images of the target domain. Blue: real images of the target domain.
 
-Before Training             |  After Training
-:-------------------------:|:-------------------------:
-<img src="https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/pca_before.PNG" width="200" />  |  <img src="https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/pca_after.PNG" width="200" />
+|Before Training | After Training |
+|:---------------|:---------------|
+|<img src="https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/pca_before.PNG" width="200" />  |  <img src="https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/pca_after.PNG" width="200" />
