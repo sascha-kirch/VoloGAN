@@ -18,33 +18,41 @@ model having only few training samples.
 
 ## Architecture: 
 <img src="https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/vologan.png" width="800" />
+Our framework consists of four models: two generators and two discriminators. The generators
+translate an RGB-D image from one domain into the respective other domain. The discriminators predict, whether a generated
+RGB-D is real or fake. We incorporate four loss terms: adversarial loss, a channel-wise cycle-consistency loss, a channel-wise
+structural similarity loss of cycled image pairs and an identity loss.
 
-### Generator
-<img src="https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/generator_model.png" width="800" />
+<details><summary>Show Models</summary>
+<p>
 
-### Discriminator
-<img src="https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/critic_model.png" width="500" />
+Generator             |  Discriminator
+:-------------------------|:-------------------------
+![](https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/generator_model.png)  | ![](https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/critic_model.png)
+Our generator follows an encoder-decoder architecture with multiple connections between encoder and decoder. | The discriminator has three outputs to evaluate weather an input RGB-D image is real or fake: low level evaluation, layout evaluation and content evaluation. We explicitly encourage the disentanglement between layout and content by a two-branch architecture.
+
+</p>
+</details>
+
+
+
 
 ## Results:
 
 ### PCA - Principal Component Analysis
+Principal component analysis of the five principal components from 50 samples of each domain. Orange: generated
+images of the target domain. Blue: real images of the target domain.
 
-**Before Training**
+Before Training             |  After Training
+:-------------------------:|:-------------------------:
+<img src="https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/pca_before.PNG" width="200" />  |  <img src="https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/pca_after.PNG" width="200" />
 
-<img src="https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/pca_before.PNG" width="200" />
-
-**After Training**
-
-<img src="https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/pca_after.PNG" width="200" />
 
 ### 3D Point Clouds
-**Input RGBD**
+Input RGBD             |  Generated RGBD
+:-------------------------:|:-------------------------:
+<img src="https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/3d_pointcloud_input.png" width="500" />  |  <img src="https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/3d_pointcloud_generated.png" width="500" />
 
-<img src="https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/3d_pointcloud_input.png" width="500" />
-
-**Generated RGBD**
-
-<img src="https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/3d_pointcloud_generated.png" width="500" />
 
 ### Generated RGBD
 <img src="https://github.com/sascha-kirch/VoloGAN/blob/master/imgs/multiple_rgb.png" width="500" />
