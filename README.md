@@ -1,6 +1,6 @@
 # VoloGAN
 
-Paper: 
+Paper: https://arxiv.org/abs/2207.09204
 
 ## Abstract: 
 
